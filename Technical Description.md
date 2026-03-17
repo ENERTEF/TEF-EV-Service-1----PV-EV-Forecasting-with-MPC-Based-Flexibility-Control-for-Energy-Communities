@@ -3,7 +3,7 @@ TEF_EV-ECC_FLEXIBILITY
 
 **AI-based forecasting and flexibility services for Energy Communities with EV charging**
 
-Overview (version 0.6)
+Overview (version 1.0)
 ----------------------
 
 **TEF_EV-ECC_FLEXIBILITY** implements data-driven forecasting and optimisation services for photovoltaic (PV) generation and electric vehicle (EV) charging demand in an Energy Community (ECC) context. The project supports flexibility assessment and smart charging strategies for a supermarket-based EV hub, developed within the TEF-EV framework.
