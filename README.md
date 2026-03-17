@@ -5,7 +5,7 @@
 **End User:** EMOT EMOTION SRL
 **Site:** Copal Supermarket Energy Community
 **Version:** 1
-**Last Updated:** 07 Dec 2025
+**Last Updated:** 17 March 2025
 
 ---
 
