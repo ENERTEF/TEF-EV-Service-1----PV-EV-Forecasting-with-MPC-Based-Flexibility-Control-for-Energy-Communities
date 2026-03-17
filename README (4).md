@@ -1,123 +1,482 @@
-TEF_EV-ECC_FLEXIBILITY
-========================
+# Energy Community Sharing & EV Charging Flexibility Optimization (ECC)
 
-**AI-based forecasting and flexibility services for Energy Communities with EV charging**
+**Service:** Energy Community Sharing & EV Charging Flexibility Optimization
+**TEF:** TEF EV – Leneda (Luxembourg)
+**End User:** EMOT EMOTION SRL
+**Site:** Copal Supermarket Energy Community
+**Version:** 1
+**Last Updated:** 07 Dec 2025
 
-Overview (version 0.6)
-----------------------
+---
 
-**TEF_EV-ECC_FLEXIBILITY** implements data-driven forecasting and optimisation services for photovoltaic (PV) generation and electric vehicle (EV) charging demand in an Energy Community (ECC) context. The project supports flexibility assessment and smart charging strategies for a supermarket-based EV hub, developed within the TEF-EV framework.
+# Overview
 
-The implemented framework combines **AI-based forecasting models with Model Predictive Control (MPC)** to enable coordinated EV charging and renewable-aware energy management. The services operate at **15-minute resolution** and provide **24-hour ahead forecasts**, enabling proactive energy management, PV self-consumption maximization, and grid interaction optimization.
+The **Energy Community Sharing & EV Charging Flexibility Optimization Service (ECC)** transforms the **TEF EV Leneda time-series dataset** for the Copal Supermarket energy community into an **operational, settlement-aware orchestration layer**.
 
-Implemented AI Services
------------------------
+The service combines:
 
-### PV Forecasting Service
+* Measured electricity signals (consumption and production)
+* **Layer-2 sharing allocation outputs (ACR)**
+* Forecasting and optimization methods
 
-*   Hybrid **LSTM-based forecasting model**
+It produces:
 
-*   Inputs: historical PV production, Open-Meteo weather data, cyclical time features
+* Auditable energy ledgers
+* PV and EV load forecasts
+* Flexibility envelopes
+* **Model Predictive Control (MPC)** EV charging recommendations
 
-*   Outputs:
+The service is designed for **continuous operational use** with:
 
-    *   One-step-ahead PV power forecasts
-        
-    *   Recursive **24-hour ahead PV generation forecasts**
-        
-    *   Short-term PV production profiles for energy management
-        
+* traceable inputs
+* reproducible optimization runs
+* auditability for energy settlement and validation
 
-### EV Charging Demand Forecasting Service
+---
 
-*   Hybrid **CNN–LSTM-based forecasting model**
+# 1. Business Context & Definitions
 
-*   Inputs: historical EV load, lagged and rolling statistics, time-of-day / day-of-week features, optional PV coupling
+The ECC service focuses on a **PV + EV charging energy community use case**.
 
-*   Outputs:
+Key characteristics:
 
-    *   One-step-ahead EV charging demand forecasts
-        
-    *   Recursive **24-hour ahead EV charging demand forecasts**
-        
-    *   Baseline EV demand profiles for flexibility optimization
-        
+* **PV production drives local energy availability**
+* **EV charging load is the controllable demand**
+* The objective is to **shift EV charging to periods of PV generation**
 
-### EV Flexibility Optimization Service
+This enables:
 
-*   **Model Predictive Control (MPC)** optimization framework
+* higher local renewable consumption
+* reduced grid export
+* reduced peak imports
 
-*   Inputs:
+The service integrates **ACR (Collective Renewable Self-Consumption) allocation outputs**, ensuring all operational outputs remain **consistent with energy settlement mechanisms**.
 
-    *   PV generation forecasts
-        
-    *   EV baseline demand forecasts
-        
-    *   electricity price signals
-        
-    *   operational charging constraints
-        
+---
 
-*   Outputs:
+# Site Specifications (ECC)
 
-    *   Optimized EV charging trajectories
-        
-    *   Grid import/export power profiles
-        
-    *   Cost-aware charging schedules
-        
-    *   Flexibility indicators for energy community operation
-        
+**PV Plant**
 
-Data Sources
-------------
+| Parameter          | Value                 |
+| ------------------ | --------------------- |
+| Installed capacity | 973.81 kWc (~1 MW)    |
+| Coordinates        | 6.48714 E, 49.70673 N |
 
-*   **Smart meter measurements** (15-minute resolution)
+**EV Chargers**
 
-    *   PV production (PV_TotalProduction_kW)
-        
-    *   EV charging consumption (EMOB1, EMOB2)
-        
-    *   Aggregated EV demand profiles
-        
+| Charger Type | Quantity | Power  |
+| ------------ | -------- | ------ |
+| AC chargers  | 8        | 22 kW  |
+| DC chargers  | 4        | 300 kW |
+| DC chargers  | 4        | 400 kW |
 
-*   **Meteorological data** from **Open-Meteo**
+**Battery storage:**
+Not installed (battery dispatch is **out of scope**).
 
-    *   Solar radiation
-        
-    *   Cloud cover
-        
-    *   Temperature
-        
-    *   Wind speed
-        
+---
 
-Use Case
---------
+# Key Terms
 
-*   Supermarket-based EV charging hub
+| Term                                            | Definition                                                                        |
+| ----------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Energy Community (ECC)**                      | Sharing group at Copal Supermarket with ACR allocation outputs                    |
+| **ACR (Collective Renewable Self-Consumption)** | Allocation framework distributing locally produced electricity among participants |
+| **Metering point / POD**                        | Unique identifier of a metered connection                                         |
+| **OBIS code**                                   | Standard identifier of measured electricity quantities                            |
+| **Timestamp ("Started at")**                    | Start of 15-minute interval including timezone                                    |
+| **Resolution / Granularity**                    | 15-minute intervals                                                               |
+| **Measured / Estimated / Edited**               | Data quality indicator                                                            |
+| **Sharing outputs (Layer-2)**                   | Computed values describing energy allocation in the community                     |
+| **Flexibility envelope**                        | Allowed modulation capacity for EV charging                                       |
+| **Model Predictive Control (MPC)**              | Rolling optimization solving every 15 minutes                                     |
 
-*   Energy Community settlement with rooftop PV generation
+---
 
-*   Aggregated EV charging infrastructure (EMOB1 / EMOB2)
+# 1.1 End User Context (EMOT Operator View)
 
-*   AI-enabled flexibility services for renewable-aware charging
+The service supports **EMOT EMOTION SRL** in planning and operating EV-ready energy communities.
 
-*   Developed within **TEF-EV Luxembourg experimental environment**
+For the **Copal Supermarket site**, the objectives are:
 
-Outputs (version 1.0)
----------------------
+* Increase **local PV consumption**
+* Reduce **PV export (reverse power flow)**
+* Reduce **grid import peaks**
+* Provide **transparent and auditable energy ledgers**
 
-*   Trained forecasting models (PV LSTM, EV CNN–LSTM)
+Operationally, the service:
 
-*   One-step and 24-hour ahead PV forecasts
+* produces **rolling control recommendations every 15 minutes**
+* enables **backtesting** to quantify improvements versus uncontrolled EV charging
 
-*   One-step and 24-hour ahead EV demand forecasts
+Each optimization result is fully **traceable to input datasets and versions**.
 
-*   MPC-based EV charging optimisation results
+---
 
-*   Grid import/export power profiles
+# 2. Problem Statement
 
-*   Performance metrics (MAE, RMSE, R²)
+The service delivers a **production-grade optimization capability** that:
 
-*   Rolling forecasting backtests and optimisation evaluations
+## 1. Builds a settlement-aware energy ledger
+
+At **15-minute resolution**, integrating:
+
+* measured PV production
+* EV charging consumption
+* Layer-2 ACR allocation outputs
+
+## 2. Generates forecasts
+
+For:
+
+* EV charging baseline consumption
+* PV production
+* derived import/export risks
+
+## 3. Runs MPC optimization
+
+The optimization recommends **EV charging load shifting** to:
+
+* reduce PV export to the market
+* increase PV self-consumption
+* reduce grid import peaks
+* ensure smooth and realistic control actions
+
+## 4. Ensures auditability
+
+Outputs maintain full lineage to:
+
+* Metering point
+* OBIS code
+* Timestamp
+* Interval length
+* Version
+* Data quality flags
+
+---
+
+# 3. Data Description
+
+## 3.1 ECC Input Schema
+
+Each record includes:
+
+| Field                         | Description                 |
+| ----------------------------- | --------------------------- |
+| Metering point                | Unique POD identifier       |
+| OBIS code                     | Signal identifier           |
+| Unit                          | kW                          |
+| Started at                    | Timestamp of interval start |
+| Value                         | Numeric measurement         |
+| Interval length               | Expected 15 minutes         |
+| Estimated / measured / edited | Data quality indicator      |
+| Version                       | Data revision index         |
+
+---
+
+## 3.2 Data Dictionaries
+
+| Signal                            | OBIS code   | CSV file                            | Unit | Time range              | Notes                 |
+| --------------------------------- | ----------- | ----------------------------------- | ---- | ----------------------- | --------------------- |
+| Measured active consumption       | 1-1:1.29.0  | ECC_ACR_8_consumers_PV_Active_C.csv | kW   | 2023-10-11 → 2025-11-13 | Community consumption |
+| Measured active production        | 1-1:2.29.0  | ECC_PV_Active_P.csv                 | kW   | 2023-10-11 → 2025-11-13 | PV production         |
+| Consumption covered by production | 1-65:1.29.3 | ECC_PV_Consumption.csv              | kW   | 2024-07-15 → 2025-11-12 |                       |
+| Remaining consumption invoiced    | 1-65:1.29.9 | ECC_PV_C_Remained.csv               | kW   | 2025-02-23 → 2025-11-12 |                       |
+| Production shared within group    | 1-65:2.29.3 | ECC_PV_P_Shared.csv                 | kW   | 2024-07-15 → 2025-11-12 | ACR sharing           |
+| Remaining production sold         | 1-65:2.29.9 | ECC_PV_P_Remained.csv               | kW   | 2024-07-15 → 2025-11-12 | PV export             |
+
+---
+
+## 3.3 Site Metering Points
+
+### PV Meter
+
+| Parameter   | Value                             |
+| ----------- | --------------------------------- |
+| POD         | LU0000010669300000000000770597826 |
+| Capacity    | 973.81 kWc                        |
+| Coordinates | 6.48714 E, 49.70673 N             |
+
+---
+
+### EV Charging Meters
+
+| Charger group | Configuration                | POD                               |
+| ------------- | ---------------------------- | --------------------------------- |
+| CBB EMOB 1    | 4 × DC 300 kW                | LU0000010669300000000000070591610 |
+| CBB EMOB 2    | 4 × DC 400 kW + 8 × AC 22 kW | LU0000010669300000000000070620104 |
+
+---
+
+### Community Consumption (ACR)
+
+Community contains **8 PODs**, including the EV chargers.
+
+Aggregated consumption identifier:
+
+```
+LU0000010669300000000000070597826
+```
+
+---
+
+### ACR Sharing Signals
+
+| Signal                             | OBIS        |
+| ---------------------------------- | ----------- |
+| Consumption covered by production  | 1-65:1.29.3 |
+| Remaining consumption invoiced     | 1-65:1.29.9 |
+| Production shared within group     | 1-65:2.29.3 |
+| Remaining production sold/exported | 1-65:2.29.9 |
+
+---
+
+## 3.4 Reconciliation Identities (QA)
+
+The following consistency checks are used.
+
+### Production split (validated)
+
+```
+Measured Production
+= Shared Production
++ Remaining Production Sold
+```
+
+```
+1-1:2.29.0
+=
+1-65:2.29.3
++
+1-65:2.29.9
+```
+
+### Consumption split (ECC caveat)
+
+Target check:
+
+```
+Measured Consumption
+≈ Covered Consumption
++ Invoiced Consumption
+```
+
+```
+1-1:1.29.0
+≈
+1-65:1.29.3
++
+1-65:1.29.9
+```
+
+---
+
+# 4. Analytics Scope & Update Frequency
+
+| Parameter        | Value                           |
+| ---------------- | ------------------------------- |
+| Forecast horizon | 24–48 hours                     |
+| Time resolution  | 15 minutes                      |
+| Update frequency | Every 15 minutes                |
+| Execution mode   | Rolling operation + backtesting |
+
+---
+
+## Output Package Per Run
+
+Each run produces:
+
+* **Issue time (UTC)**
+* Forecasts for:
+
+  * EV charging load
+  * PV production
+* **MPC optimization results**
+
+  * EV charging modulation trajectory
+* Derived KPIs
+
+  * import/export metrics
+  * peak demand metrics
+* Traceability metadata
+
+  * input data versions
+  * model version
+  * run ID
+
+---
+
+# 5. Evaluation Protocols & Metrics
+
+The evaluation ensures the service provides **stable and operational optimization results**.
+
+---
+
+## 5.1 Backtesting Protocol
+
+Evaluation uses a **rolling historical simulation**.
+
+Procedure:
+
+1. Select a historical period.
+2. At each decision timestamp:
+
+   * use only data available at that time
+3. Generate forecasts.
+4. Run MPC optimization.
+5. Apply only the **first control action**.
+6. Compare results with a **baseline (uncontrolled charging)**.
+
+---
+
+## 5.2 Data Gaps & Exceptions
+
+Handling rules:
+
+* Missing or invalid intervals are **excluded from scoring**
+* If insufficient data exists:
+
+  * the service returns a structured error
+  * or falls back to safe behavior:
+
+```
+u = 0
+```
+
+(no EV charging control applied)
+
+---
+
+## 5.3 KPIs
+
+### Export Reduction
+
+Reduction in exported PV energy.
+
+Proxy signals:
+
+* `1-65:2.29.9`
+* or derived grid export intervals
+
+---
+
+### Import Energy & Peak Reduction
+
+Measured via:
+
+* total grid import reduction
+* peak demand reduction
+
+---
+
+### PV-to-EV Alignment
+
+Increase in intervals where:
+
+```
+EV charging ≈ PV production
+```
+
+---
+
+### Control Smoothness
+
+Measured via:
+
+* ramp usage
+* boundedness of charging adjustments
+
+---
+
+### Forecast Accuracy (optional)
+
+Metrics:
+
+* MAE
+* RMSE
+
+For:
+
+* PV production forecast
+* EV load baseline forecast
+
+---
+
+# 6. Deliverables & Submissions
+
+The service lifecycle produces **three reports**.
+
+---
+
+## 6.1 Deliverable Reports
+
+### 1️⃣ Pre-Service Deliverable
+
+**Service Design & Setup Report**
+
+Includes:
+
+* analytical approach
+* forecasting methodology
+* baseline definition
+* MPC formulation
+* backtesting plan
+
+---
+
+### 2️⃣ Intermediate Deliverable
+
+**Interim Performance & Operations Report**
+
+Includes:
+
+* data coverage
+* preliminary KPI results
+* limitations
+* calibration updates
+
+---
+
+### 3️⃣ Final Deliverable
+
+**Final Evaluation & Recommendations Report**
+
+Includes:
+
+* final performance results
+* KPI improvements
+* operational recommendations
+* future roadmap
+
+Example improvements:
+
+* EV session-aware control
+* enhanced telemetry integration
+
+---
+
+## 6.2 Technical Submissions
+
+Required artifacts:
+
+* **Service interface documentation**
+
+  * input/output formats
+  * run configuration
+  * audit metadata
+
+* **Deployment artifacts**
+
+  * reproducible environment
+  * containerization if required
+
+* **Configuration documentation**
+
+  * model versions
+  * dataset versions
+  * calibration parameters
+
+* **Security & data protection notes**
+
+  * handling of site identifiers
+  * GDPR-aligned logging practices
